@@ -202,40 +202,92 @@ end
 
 local function hasIceQueen()
 
-if game.PlaceId ~= 16277809958 then
-return false
+if placeId == 16146832113 then
+    local items
+    local start = tick()
+
+    repeat
+        local ok
+        ok, items = pcall(function()
+            return playerGui.Windows.GlobalInventory.Holder
+                .LeftContainer.FakeScrollingFrame.Items
+        end)
+        task.wait(0.5)
+    until items or tick() - start > 15
+
+    if not items then
+        warn("[IceQueen] ❌ Items not loaded")
+        return false
+    end
+
+    local foundAnyContainer = false
+
+    for _, cache in ipairs(items:GetChildren()) do
+        if cache.Name == "CacheContainer" then
+            foundAnyContainer = true
+
+            for _, uuid in ipairs(cache:GetChildren()) do
+                local holder = uuid:FindFirstChild("Container")
+                    and uuid.Container:FindFirstChild("Holder")
+
+                if holder and holder:FindFirstChild("Ice Queen (Release)") then
+                    print("[IceQueen] ✅ FOUND Ice Queen (Inventory)")
+                    return true
+                end
+            end
+        end
+    end
+
+    if not foundAnyContainer then
+            warn("[IceQueen] ❌ No CacheContainer found")
+    end
+
+    print("[IceQueen] ❌ Not found in Inventory")
+    return false
 end
 
-local units
+-- ======================================================
+-- PlaceID 16277809958 : Units View
+-- Path:
+-- Units.<UUID>.Container.Holder.Main.UnitName.ContentText
+-- ======================================================
+if placeId == 16277809958 then
+    local units
+    local start = tick()
 
-pcall(function()
-units = playerGui.Windows.Units.Holder.Main.Units
-end)
+    repeat
+        local ok
+        ok, units = pcall(function()
+            return playerGui.Windows.Units.Holder.Main.Units
+        end)
+        task.wait(0.5)
+    until units or tick() - start > 15
 
-if not units then return false end
+    if not units then
+        warn("[IceQueen] ❌ Units UI not loaded")
+        return false
+    end
 
-for _,uuid in ipairs(units:GetChildren()) do
+    for _, uuid in ipairs(units:GetChildren()) do
+        local ok2, label = pcall(function()
+            return uuid.Container.Holder.Main.UnitName
+        end)
 
-local ok,label = pcall(function()
-return uuid.Container.Holder.Main.UnitName
-end)
+        if ok2 and label then
+            local name = (label.ContentText or label.Text or ""):gsub("%s+$", "")
+            print("[IceQueen] UnitName =", name)
 
-if ok and label then
+            if name == "Ice Queen (Release)" then
+                print("[IceQueen] ✅ FOUND Ice Queen (Units View)")
+                getgenv().SavedData.HasIceQueen = true
+                return true
+            end
+        end
+    end
 
-local name = (label.ContentText or label.Text or ""):gsub("%s+$","")
-
-if name == "Ice Queen (Release)" then
-return true
+    print("[IceQueen] ❌ Not found in Units View")
+    return false
 end
-
-end
-
-end
-
-return false
-
-end
-
 
 -- =========================
 -- MEMORIA
