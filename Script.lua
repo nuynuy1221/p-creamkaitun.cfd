@@ -32,10 +32,11 @@ local playerGui = player:WaitForChild("PlayerGui",60)
 
 local function getRequest()
 
-return syn and syn.request
-or http_request
-or request
-or (fluxus and fluxus.request)
+    return (syn and syn.request)
+        or (http and http.request)
+        or http_request
+        or request
+        or (fluxus and fluxus.request)
 
 end
 
