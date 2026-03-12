@@ -317,7 +317,8 @@ req({
 Url = SERVER,
 Method = "POST",
 Headers = {
-["Content-Type"] = "application/json"
+["Content-Type"] = "application/json",
+["Accept"] = "application/json"
 },
 Body = HttpService:JSONEncode(data)
 })
