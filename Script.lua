@@ -196,56 +196,118 @@ return 0
 
 end
 
-
 -- =========================
--- ICE QUEEN
+-- ICE QUEEN (Improved Check)
 -- =========================
 
 local function hasIceQueen()
 
-local placeId = game.PlaceId
+    local placeId = game.PlaceId
 
-if placeId == 16146832113 then
-    local items
-    local start = tick()
+    print("[IceQueen] check start | PlaceId =", placeId)
 
-    repeat
-        local ok
-        ok, items = pcall(function()
-            return playerGui.Windows.GlobalInventory.Holder
-                .LeftContainer.FakeScrollingFrame.Items
-        end)
-        task.wait(0.5)
-    until items or tick() - start > 15
+    -- ======================================================
+    -- Lobby : Inventory
+    -- ======================================================
+    if placeId == 16146832113 then
 
-    if not items then
-        warn("[IceQueen] ❌ Items not loaded")
+        local items
+        local start = tick()
+
+        repeat
+            local ok
+            ok, items = pcall(function()
+                return playerGui.Windows.GlobalInventory.Holder
+                    .LeftContainer.FakeScrollingFrame.Items
+            end)
+
+            task.wait(0.5)
+
+        until items or tick() - start > 15
+
+
+        if not items then
+            warn("[IceQueen] ❌ Items UI not loaded")
+            return false
+        end
+
+
+        for _, cache in ipairs(items:GetChildren()) do
+            if cache.Name == "CacheContainer" then
+
+                for _, uuid in ipairs(cache:GetChildren()) do
+
+                    local holder =
+                        uuid:FindFirstChild("Container")
+                        and uuid.Container:FindFirstChild("Holder")
+
+                    if holder and holder:FindFirstChild("Ice Queen (Release)") then
+                        print("[IceQueen] ✅ FOUND Ice Queen (Inventory)")
+                        return true
+                    end
+
+                end
+
+            end
+        end
+
+        print("[IceQueen] ❌ Not found in Inventory")
         return false
     end
 
-    local foundAnyContainer = false
 
-    for _, cache in ipairs(items:GetChildren()) do
-        if cache.Name == "CacheContainer" then
-            foundAnyContainer = true
+    -- ======================================================
+    -- Farm : Units View
+    -- ======================================================
+    if placeId == 16277809958 then
 
-            for _, uuid in ipairs(cache:GetChildren()) do
-                local holder = uuid:FindFirstChild("Container")
-                    and uuid.Container:FindFirstChild("Holder")
+        local units
+        local start = tick()
 
-                if holder and holder:FindFirstChild("Ice Queen (Release)") then
-                    print("[IceQueen] ✅ FOUND Ice Queen (Inventory)")
+        repeat
+            local ok
+            ok, units = pcall(function()
+                return playerGui.Windows.Units.Holder.Main.Units
+            end)
+
+            task.wait(0.5)
+
+        until units or tick() - start > 15
+
+
+        if not units then
+            warn("[IceQueen] ❌ Units UI not loaded")
+            return false
+        end
+
+
+        for _, uuid in ipairs(units:GetChildren()) do
+
+            local ok2, label = pcall(function()
+                return uuid.Container.Holder.Main.UnitName
+            end)
+
+            if ok2 and label then
+
+                local name =
+                    (label.ContentText or label.Text or "")
+                    :gsub("%s+$", "")
+
+                print("[IceQueen] UnitName =", name)
+
+                if name == "Ice Queen (Release)" then
+                    print("[IceQueen] ✅ FOUND Ice Queen (Units)")
                     return true
                 end
             end
         end
+
+
+        print("[IceQueen] ❌ Not found in Units")
+        return false
     end
 
-    if not foundAnyContainer then
-            warn("[IceQueen] ❌ No CacheContainer found")
-    end
 
-    print("[IceQueen] ❌ Not found in Inventory")
     return false
 end
 
