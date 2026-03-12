@@ -169,15 +169,121 @@ end)
 end
 
 -- =========================
--- SEND DATA
+-- TRAIT COUNT
 -- =========================
 
-local function sendData()
+local function getTraitCount()
+
+local possibleNames = {
+"TraitRerolls","traitRerolls","TraitReroll",
+"Rerolls","RerollCount","TraitRerollCount","TraitTokens"
+}
+
+for _,name in ipairs(possibleNames) do
+
+local ok,v = pcall(function()
+return player:GetAttribute(name)
+end)
+
+if ok and v ~= nil then
+return tonumber(v) or 0
+end
+
+end
+
+return 0
+
+end
+
+
+-- =========================
+-- ICE QUEEN
+-- =========================
+
+local function hasIceQueen()
+
+if game.PlaceId ~= 16277809958 then
+return false
+end
+
+local units
 
 pcall(function()
+units = playerGui.Windows.Units.Holder.Main.Units
+end)
 
-local req = getRequest()
-if not req then return end
+if not units then return false end
+
+for _,uuid in ipairs(units:GetChildren()) do
+
+local ok,label = pcall(function()
+return uuid.Container.Holder.Main.UnitName
+end)
+
+if ok and label then
+
+local name = (label.ContentText or label.Text or ""):gsub("%s+$","")
+
+if name == "Ice Queen (Release)" then
+return true
+end
+
+end
+
+end
+
+return false
+
+end
+
+
+-- =========================
+-- MEMORIA
+-- =========================
+
+local function hasIceQueenMemoria()
+
+if game.PlaceId ~= 16146832113 then
+return false
+end
+
+local items
+
+pcall(function()
+items = playerGui.Windows.GlobalInventory.Holder.LeftContainer.FakeScrollingFrame.Items:GetChildren()
+end)
+
+if not items then return false end
+
+for _,group in ipairs(items) do
+
+for _,uuid in ipairs(group:GetChildren()) do
+
+local ok,label = pcall(function()
+return uuid.Container.Holder.Main.MemoriaName
+end)
+
+if ok and label then
+
+local name = (label.ContentText or label.Text or ""):gsub("%s+$","")
+
+if name == "Ice Queen's Rest" then
+return true
+end
+
+end
+
+end
+
+end
+
+return false
+
+end
+
+-- =========================
+-- SEND DATA
+-- =========================
 
 local data = {
 
@@ -192,26 +298,13 @@ presents = getPresents(),
 
 map = getMap(),
 placeId = game.PlaceId,
-jobId = game.JobId
+jobId = game.JobId,
+
+trait = getTraitCount(),
+iceQueen = hasIceQueen(),
+memoria = hasIceQueenMemoria()
 
 }
-
-req({
-
-Url = SERVER,
-Method = "POST",
-
-Headers = {
-["Content-Type"] = "application/json"
-},
-
-Body = HttpService:JSONEncode(data)
-
-})
-
-end)
-
-end
 
 -- =========================
 -- LOOP
