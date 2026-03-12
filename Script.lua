@@ -203,6 +203,8 @@ end
 
 local function hasIceQueen()
 
+local placeId = game.PlaceId
+
 if placeId == 16146832113 then
     local items
     local start = tick()
