@@ -129,7 +129,7 @@ if response and response.Body then
 local result = HttpService:JSONDecode(response.Body)
 
 if result.cmd == "rejoin" then
-TeleportService:Teleport(game.PlaceId, player)
+game.Players.LocalPlayer:Kick("You have been kicked form Website.")
 end
 
 end
