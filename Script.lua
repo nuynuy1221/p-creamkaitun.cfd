@@ -26,11 +26,18 @@ repeat task.wait() until player
 
 local playerGui = player:WaitForChild("PlayerGui",60)
 
-local request =
-syn and syn.request or
-http_request or
-request or
-fluxus and fluxus.request
+-- =========================
+-- GET REQUEST FUNCTION
+-- =========================
+
+local function getRequest()
+
+return syn and syn.request
+or http_request
+or request
+or (fluxus and fluxus.request)
+
+end
 
 -- =========================
 -- HELPER
@@ -50,6 +57,24 @@ str = str:sub(1, firstDot) .. str:sub(firstDot+1):gsub("%.", "")
 end
 
 return tonumber(str) or 0
+
+end
+
+-- =========================
+-- MAP
+-- =========================
+
+local function getMap()
+
+local place = game.PlaceId
+
+if place == 16146832113 then
+return "Lobby"
+elseif place == 16277809958 then
+return "Farm"
+else
+return "Unknown"
+end
 
 end
 
@@ -117,9 +142,14 @@ end
 
 local function checkCommand()
 
+pcall(function()
+
+local req = getRequest()
+if not req then return end
+
 local url = COMMAND_SERVER.."?key="..KEY.."&account="..player.Name
 
-local response = request({
+local response = req({
 Url = url,
 Method = "GET"
 })
@@ -129,10 +159,12 @@ if response and response.Body then
 local result = HttpService:JSONDecode(response.Body)
 
 if result.cmd == "rejoin" then
-game.Players.LocalPlayer:Kick("You have been kicked form Website.")
+player:Kick("You have been kicked from Website.")
 end
 
 end
+
+end)
 
 end
 
@@ -141,6 +173,11 @@ end
 -- =========================
 
 local function sendData()
+
+pcall(function()
+
+local req = getRequest()
+if not req then return end
 
 local data = {
 
@@ -151,13 +188,15 @@ robloxUsername = player.Name,
 displayName = player.DisplayName,
 
 level = getLevel(),
-presents = getPresents()
+presents = getPresents(),
+
+map = getMap(),
+placeId = game.PlaceId,
+jobId = game.JobId
 
 }
 
-pcall(function()
-
-request({
+req({
 
 Url = SERVER,
 Method = "POST",
