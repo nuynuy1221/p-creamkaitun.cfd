@@ -285,6 +285,13 @@ end
 -- SEND DATA
 -- =========================
 
+local function sendData()
+
+pcall(function()
+
+local req = getRequest()
+if not req then return end
+
 local data = {
 
 key = KEY,
@@ -305,6 +312,19 @@ iceQueen = hasIceQueen(),
 memoria = hasIceQueenMemoria()
 
 }
+
+req({
+Url = SERVER,
+Method = "POST",
+Headers = {
+["Content-Type"] = "application/json"
+},
+Body = HttpService:JSONEncode(data)
+})
+
+end)
+
+end
 
 -- =========================
 -- LOOP
