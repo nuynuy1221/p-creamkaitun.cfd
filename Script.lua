@@ -312,47 +312,18 @@ local function hasIceQueen()
 end
 
 -- =========================
--- MEMORIA
+-- MEMORIA (Attribute)
 -- =========================
 
 local function hasIceQueenMemoria()
 
-if game.PlaceId ~= 16146832113 then
-return false
-end
+    local value = player:GetAttribute("WinterMemoriaVanguardPityCompleted")
 
-local items
+    if value == true then
+        return true
+    end
 
-pcall(function()
-items = playerGui.Windows.GlobalInventory.Holder.LeftContainer.FakeScrollingFrame.Items:GetChildren()
-end)
-
-if not items then return false end
-
-for _,group in ipairs(items) do
-
-for _,uuid in ipairs(group:GetChildren()) do
-
-local ok,label = pcall(function()
-return uuid.Container.Holder.Main.MemoriaName
-end)
-
-if ok and label then
-
-local name = (label.ContentText or label.Text or ""):gsub("%s+$","")
-
-if name == "Ice Queen's Rest" then
-return true
-end
-
-end
-
-end
-
-end
-
-return false
-
+    return false
 end
 
 -- =========================
